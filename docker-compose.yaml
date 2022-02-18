@@ -1,0 +1,21 @@
+# Version of docker-compose
+version: "3"
+volumes:
+  postgres_data:
+    driver: local
+# Containers we are going to run
+services:
+  postgres:
+    image: postgres:13.2-alpine
+    ports:
+      - 5432:5432
+    environment:
+      # Set user/password for Postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: potinho_dev
+      # Set a path where Postgres should store the data
+      PGDATA: /var/lib/postgresql/data/pgdata
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data

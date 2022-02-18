@@ -6,6 +6,9 @@ defmodule PotinhoWeb.Router do
   end
 
   scope "/api", PotinhoWeb do
+
+    post "/signup", UserController, :create
+
     pipe_through :api
   end
 
@@ -25,6 +28,8 @@ defmodule PotinhoWeb.Router do
       live_dashboard "/dashboard", metrics: PotinhoWeb.Telemetry
     end
   end
+
+
 
   # Enables the Swoosh mailbox preview in development.
   #

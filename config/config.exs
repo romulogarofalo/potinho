@@ -50,3 +50,10 @@ config :phoenix, :json_library, Jason
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
+
+config :money,
+  default_currency: :BRL,           # this allows you to do Money.new(100)
+  separator: ",",                   # change the default thousands separator for Money.to_string
+  delimiter: ".",                   # change the default decimal delimeter for Money.to_string
+  symbol: false,                     # don’t display the currency symbol in Money.to_string
+  fractional_unit: true             # display units after the delimeterr

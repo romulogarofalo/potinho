@@ -1,10 +1,8 @@
 defmodule Potinho.User.CreateTest do
-	use ExUnit.Case
+  use ExUnit.Case
   use Potinho.DataCase
 
-
-	doctest Potinho.User.Create
-	alias Potinho.User.Create
+  alias Potinho.User.Create
 
   describe "run/1" do
     test "with ok params" do

@@ -8,6 +8,7 @@ defmodule PotinhoWeb.Router do
   scope "/api", PotinhoWeb do
 
     post "/signup", UserController, :create
+    post "/login", AuthController, :login
 
     pipe_through :api
   end

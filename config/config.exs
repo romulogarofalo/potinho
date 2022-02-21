@@ -57,3 +57,7 @@ config :money,
   delimiter: ".",                   # change the default decimal delimeter for Money.to_string
   symbol: false,                     # don’t display the currency symbol in Money.to_string
   fractional_unit: true             # display units after the delimeterr
+
+config :potinho, Potinho.Guardian,
+  issuer: "potinho",
+  secret_key: "2W5jhBgVuRxsa/tWDzdov9dudbtOLXS/cwB6XLynGWbAuKkuI47WmI1fHDsjsy1n"

@@ -13,10 +13,11 @@ defmodule Potinho.User do
   end
 
   @required_attrs [:full_name_user, :password, :cpf]
+  @castable_fields [:full_name_user, :password, :cpf, :balance]
 
   def create_changeset(attrs) do
     %__MODULE__{}
-    |> cast(attrs, @required_attrs)
+    |> cast(attrs, @castable_fields)
     |> validate_required(@required_attrs)
     |> validate_change(:cpf, validate_cpf())
     |> unique_constraint([:cpf])
@@ -29,13 +30,12 @@ defmodule Potinho.User do
 
   defp put_password_hash(changeset), do: changeset
 
-  defp validate_cpf() do
+  def validate_cpf() do
     fn :cpf, cpf ->
       if not Brcpfcnpj.cpf_valid?(cpf) do
         [cpf: "invalid format"]
-      else
-        []
       end
+      []
     end
   end
 

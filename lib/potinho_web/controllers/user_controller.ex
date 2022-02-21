@@ -10,12 +10,17 @@ defmodule PotinhoWeb.UserController do
       |> put_status(:created)
       |> render("created.json", %{user: user})
     else
+      {:error, %Ecto.Changeset{errors: [
+        cpf: {"has already been taken",
+         [constraint: :unique, constraint_name: "users_cpf_index"]}
+      ]}} ->
+        ErrorHandler.conflict(conn)
+
       {:error, %Ecto.Changeset{}} ->
-        IO.inspect("agora foi")
         ErrorHandler.bad_request(conn)
 
       {:error, _} ->
-        ErrorHandler.bad_request(conn)
+        ErrorHandler.internal_server_error(conn)
     end
   end
 

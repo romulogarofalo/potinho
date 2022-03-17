@@ -5,7 +5,7 @@ defmodule Potinho.Login do
 
   alias Potinho.User
 
-  schema "login" do
+  embedded_schema do
     field :cpf, :string
     field :password, :string
   end
@@ -17,6 +17,6 @@ defmodule Potinho.Login do
     |> cast(attrs, @required_attrs)
     |> validate_required(@required_attrs)
     |> validate_change(:cpf, User.validate_cpf())
-    |> apply_action(:insert)
+    |> apply_action(:login)
   end
 end

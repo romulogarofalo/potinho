@@ -1,20 +1,25 @@
 defmodule PotinhoWeb.Helpers.ErrorHandler do
-
   import Plug.Conn
 
   def bad_request(conn, msg \\ "bad_request") do
-    send_resp(conn, 400, Jason.encode!(msg))
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(400, Jason.encode!(%{message: msg}))
   end
 
   def conflict(conn) do
-    send_resp(conn, 409, Jason.encode!("conflict"))
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(409, Jason.encode!(%{message: "conflict"}))
   end
 
-  def internal_server_error(conn, msg \\ "internal_server_error") do
-    send_resp(conn, 500, Jason.encode!(msg))
+  def internal_server_error(conn, msg \\ %{message: "internal_server_error"}) do
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(500, Jason.encode!(msg))
   end
 
-  def not_found(conn, msg \\ "not_found") do
+  def not_found(conn, msg \\ %{message: "not_found"}) do
     send_resp(conn, 404, Jason.encode!(msg))
   end
 end

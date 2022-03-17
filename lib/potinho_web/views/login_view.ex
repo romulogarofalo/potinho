@@ -1,5 +1,4 @@
-defmodule PotinhoWeb.LoginView do
-
+defmodule PotinhoWeb.AuthView do
   def render("login.json", %{token: token}) do
     %{
       message: "Login susseful",

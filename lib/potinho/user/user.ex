@@ -24,7 +24,9 @@ defmodule Potinho.User do
     |> put_password_hash()
   end
 
-  defp put_password_hash(%Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset) do
+  defp put_password_hash(
+         %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
+       ) do
     change(changeset, Bcrypt.add_hash(password))
   end
 
@@ -32,11 +34,11 @@ defmodule Potinho.User do
 
   def validate_cpf() do
     fn :cpf, cpf ->
-      if not Brcpfcnpj.cpf_valid?(cpf) do
+      if Brcpfcnpj.cpf_valid?(cpf) do
+        []
+      else
         [cpf: "invalid format"]
       end
-      []
     end
   end
-
 end

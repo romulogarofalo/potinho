@@ -7,7 +7,7 @@ defmodule PotinhoWeb.AuthController do
 
   def login(conn, params) do
     with {:ok, changeset} <- Login.validate(params),
-    {:ok, token} <- Authenticate.run(changeset) do
+         {:ok, token} <- Authenticate.run(changeset) do
       conn
       |> put_status(:ok)
       |> render("login.json", %{token: token})

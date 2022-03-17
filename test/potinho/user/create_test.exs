@@ -16,12 +16,13 @@ defmodule Potinho.User.CreateTest do
         "cpf" => cpf
       }
 
-      assert {:ok, %{
-        full_name_user: ^full_name,
-        password: ^password,
-        password_hash: password_hash,
-        cpf: ^cpf
-      }} = Create.run(params)
+      assert {:ok,
+              %{
+                full_name_user: ^full_name,
+                password: ^password,
+                password_hash: password_hash,
+                cpf: ^cpf
+              }} = Create.run(params)
 
       assert Bcrypt.verify_pass(password, password_hash)
     end
@@ -39,11 +40,12 @@ defmodule Potinho.User.CreateTest do
 
       Create.run(params)
 
-      assert {:error, %{
-        errors: [
-          cpf: {msg, _}
-        ]
-      }} = Create.run(params)
+      assert {:error,
+              %{
+                errors: [
+                  cpf: {msg, _}
+                ]
+              }} = Create.run(params)
 
       assert msg == "has already been taken"
     end
@@ -57,15 +59,16 @@ defmodule Potinho.User.CreateTest do
 
       Create.run(params)
 
-      assert {:error, %{
-        errors: errors
-      }} = Create.run(params)
+      assert {:error,
+              %{
+                errors: errors
+              }} = Create.run(params)
 
       assert errors == [
-        {:full_name_user, {"can't be blank", [validation: :required]}},
-        {:password, {"can't be blank", [validation: :required]}},
-        {:cpf, {"can't be blank", [validation: :required]}}
-      ]
+               {:full_name_user, {"can't be blank", [validation: :required]}},
+               {:password, {"can't be blank", [validation: :required]}},
+               {:cpf, {"can't be blank", [validation: :required]}}
+             ]
     end
 
     test "when cpf is wrong format" do
@@ -81,11 +84,12 @@ defmodule Potinho.User.CreateTest do
 
       Create.run(params)
 
-      assert {:error, %{
-        errors: [
-          cpf: {msg, _}
-        ]
-      }} = Create.run(params)
+      assert {:error,
+              %{
+                errors: [
+                  cpf: {msg, _}
+                ]
+              }} = Create.run(params)
 
       assert msg == "invalid format"
     end

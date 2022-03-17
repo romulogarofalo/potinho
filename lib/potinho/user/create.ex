@@ -1,5 +1,4 @@
 defmodule Potinho.User.Create do
-
   alias Potinho.Repo
   alias Potinho.User
 

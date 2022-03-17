@@ -17,18 +17,18 @@ defmodule Potinho.UserTest do
       }
 
       assert %Ecto.Changeset{
-        changes: %{
-          full_name_user: ^full_name,
-          password: ^password,
-          password_hash: password_hash,
-          cpf: ^cpf,
-          balance: balance
-        },
-        valid?: true,
-        errors: []
-      } = User.create_changeset(params)
+               changes: %{
+                 full_name_user: ^full_name,
+                 password: ^password,
+                 password_hash: password_hash,
+                 cpf: ^cpf,
+                 balance: balance
+               },
+               valid?: true,
+               errors: []
+             } = User.create_changeset(params)
 
-      assert balance == %Money{amount: 100050, currency: :BRL}
+      assert balance == %Money{amount: 100_050, currency: :BRL}
       assert Bcrypt.verify_pass(password, password_hash)
     end
 
@@ -44,14 +44,14 @@ defmodule Potinho.UserTest do
       }
 
       assert %Ecto.Changeset{
-        changes: %{
-          full_name_user: ^full_name,
-          password: ^password,
-          cpf: ^cpf
-        },
-        valid?: false,
-        errors: [{:cpf, {"invalid format", []}}]
-      } = User.create_changeset(params)
+               changes: %{
+                 full_name_user: ^full_name,
+                 password: ^password,
+                 cpf: ^cpf
+               },
+               valid?: false,
+               errors: [{:cpf, {"invalid format", []}}]
+             } = User.create_changeset(params)
     end
   end
 end

@@ -1,5 +1,4 @@
 defmodule PotinhoWeb.UserView do
-
   def render("created.json", %{user: user}) do
     %{
       message: "User Created",

@@ -52,11 +52,16 @@ config :phoenix, :json_library, Jason
 import_config "#{config_env()}.exs"
 
 config :money,
-  default_currency: :BRL,           # this allows you to do Money.new(100)
-  separator: ",",                   # change the default thousands separator for Money.to_string
-  delimiter: ".",                   # change the default decimal delimeter for Money.to_string
-  symbol: false,                     # don’t display the currency symbol in Money.to_string
-  fractional_unit: true             # display units after the delimeterr
+  # this allows you to do Money.new(100)
+  default_currency: :BRL,
+  # change the default thousands separator for Money.to_string
+  separator: ",",
+  # change the default decimal delimeter for Money.to_string
+  delimiter: ".",
+  # don’t display the currency symbol in Money.to_string
+  symbol: false,
+  # display units after the delimeterr
+  fractional_unit: true
 
 config :potinho, Potinho.Guardian,
   issuer: "potinho",

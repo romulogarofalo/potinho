@@ -50,7 +50,8 @@ defmodule Potinho.MixProject do
       {:comeonin, "~> 5.3"},
       {:bcrypt_elixir, "~> 2.0"},
       {:brcpfcnpj, "~> 1.0.0"},
-      {:guardian, "~> 2.0"}
+      {:guardian, "~> 2.0"},
+      {:ex_audit, "~> 0.9"}
     ]
   end
 

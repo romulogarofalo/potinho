@@ -15,6 +15,11 @@ defmodule Potinho.User do
   @required_attrs [:full_name_user, :password, :cpf]
   @castable_fields [:full_name_user, :password, :cpf, :balance]
 
+  def changeset(changeset, attrs) do
+    changeset
+    |> cast(attrs, @castable_fields)
+  end
+
   def create_changeset(attrs) do
     %__MODULE__{}
     |> cast(attrs, @castable_fields)

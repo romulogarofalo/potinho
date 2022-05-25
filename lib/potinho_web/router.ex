@@ -5,12 +5,24 @@ defmodule PotinhoWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug PotinhoWeb.Auth.Pipeline
+  end
+
   scope "/api", PotinhoWeb do
+    pipe_through :api
+
     post "/signup", UserController, :create
     post "/login", AuthController, :login
-
-    pipe_through :api
   end
+
+  scope "/api", PotinhoWeb do
+    pipe_through [:api, :auth]
+
+    post "/transaction", TransactionController, :create
+  end
+
+
 
   # Enables LiveDashboard only for development
   #

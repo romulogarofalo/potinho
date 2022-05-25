@@ -5,18 +5,19 @@ defmodule PotinhoWeb.UserController do
   alias PotinhoWeb.Helpers.ErrorHandler
 
   def create(conn, params) do
-    with {:ok, user} <- Create.run(params) do
-      conn
-      |> put_status(:created)
-      |> render("created.json", %{user: user})
-    else
+    case Create.run(params) do
+      {:ok, user} ->
+        conn
+        |> put_status(:created)
+        |> render("created.json", %{user: user})
+
       {:error,
-       %Ecto.Changeset{
-         errors: [
-           cpf:
-             {"has already been taken", [constraint: :unique, constraint_name: "users_cpf_index"]}
-         ]
-       }} ->
+        %Ecto.Changeset{
+          errors: [
+            cpf:
+              {"has already been taken", [constraint: :unique, constraint_name: "users_cpf_index"]}
+          ]
+        }} ->
         ErrorHandler.conflict(conn)
 
       {:error, %Ecto.Changeset{}} ->

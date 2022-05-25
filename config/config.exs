@@ -64,3 +64,6 @@ config :money,
 config :potinho, Potinho.Guardian,
   issuer: "potinho",
   secret_key: "2W5jhBgVuRxsa/tWDzdov9dudbtOLXS/cwB6XLynGWbAuKkuI47WmI1fHDsjsy1n"
+
+config :potinho, PotinhoWeb.Auth.Pipeline,
+  module: Potinho.Guardian

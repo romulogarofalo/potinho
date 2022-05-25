@@ -16,7 +16,7 @@ defmodule Potinho.Login do
     %__MODULE__{}
     |> cast(attrs, @required_attrs)
     |> validate_required(@required_attrs)
-    |> validate_change(:cpf, User.validate_cpf())
+    |> validate_change(:cpf, &User.validate_cpf/2)
     |> apply_action(:login)
   end
 end

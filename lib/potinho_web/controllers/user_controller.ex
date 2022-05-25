@@ -2,6 +2,7 @@ defmodule PotinhoWeb.UserController do
   use PotinhoWeb, :controller
 
   alias Potinho.User.Create
+  alias Potinho.User.Get
   alias PotinhoWeb.Helpers.ErrorHandler
 
   def create(conn, params) do
@@ -25,6 +26,15 @@ defmodule PotinhoWeb.UserController do
 
       {:error, _} ->
         ErrorHandler.internal_server_error(conn)
+    end
+  end
+
+  def show(conn) do
+    with %{"id" => user_sender_id} <- Guardian.Plug.current_resource(conn),
+      {:ok, user} <- Get.balance(user_sender_id) do
+      conn
+        |> put_status(:ok)
+        |> render("show.json", %{user: user})
     end
   end
 end

@@ -10,4 +10,14 @@ defmodule PotinhoWeb.UserView do
       }
     }
   end
+
+  def render("show.json", %{user: user}) do
+    %{
+      user: %{
+        cpf: user.cpf,
+        balance: user.balance,
+        full_name_user: user.full_name_user,
+      }
+    }
+  end
 end

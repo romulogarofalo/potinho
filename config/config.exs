@@ -22,7 +22,8 @@ config :ex_audit,
   ecto_repos: [Potinho.Repo],
   version_schema: Potinho.Version,
   tracked_schemas: [
-    Potinho.User
+    Potinho.User,
+    Potinho.Transaction
   ]
 
 # Configures the mailer

@@ -4,6 +4,9 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
   alias Potinho.User.Create
   alias Potinho.Guardian
+  alias Potinho.Version
+  alias Potinho.Transaction
+  alias Potinho.User
 
   describe "POST /api/transaction" do
     setup %{conn: conn} do
@@ -25,7 +28,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
       params2 = %{
         "full_name_user" => full_name,
         "password" => password,
-        "cpf" => cpf,
+        "cpf" => cpf2,
         "balance" => "200.50"
       }
 
@@ -50,13 +53,19 @@ defmodule PotinhoWeb.TransactionControllerTest do
         "cpf_reciever" => user2["cpf"],
         "amount" => "300"
       }
-      IO.inspect(Routes.transaction_path(conn, :create))
-      IO.inspect(params)
-      post(conn, Routes.transaction_path(conn, :create), params)
-      |> IO.inspect()
+      response = post(conn, Routes.transaction_path(conn, :create), params)
+
+      IO.inspect(response.body_params)
+      IO.inspect(Potinho.Repo.all(User))
+      IO.inspect(Potinho.Repo.all(Transaction))
+      IO.inspect(Potinho.Repo.all(Version))
     end
   end
 
+  describe "GET /api/transaction" do
+    test "" do
 
+    end
+  end
 
 end

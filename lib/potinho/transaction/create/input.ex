@@ -1,4 +1,4 @@
-defmodule Potinho.Transaction.Input do
+defmodule Potinho.Transaction.Create.Input do
   alias Potinho.User
 
   use Ecto.Schema
@@ -17,7 +17,6 @@ defmodule Potinho.Transaction.Input do
     |> cast(attrs, @required_attrs)
     |> validate_required(@required_attrs)
     |> validate_change(:cpf_reciever, &User.validate_cpf/2)
-    |> IO.inspect()
     |> apply_action(:transaction)
   end
 end

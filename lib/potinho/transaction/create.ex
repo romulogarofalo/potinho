@@ -3,11 +3,14 @@ defmodule Potinho.Transaction.Create do
   alias Ecto.Multi
   alias Potinho.User
   alias Potinho.Transaction
+  alias Potinho.Repo
+
   import Ecto.Query, only: [from: 2]
 
-  def run(user_sender, user_reciever, amount) do
+  def run(%{cpf_reciever: cpf_reciever, amount: amount, id_sender: id_sender}) do
     Multi.new()
-    |> Multi.run(:retrieve_users_step, get_users(user_sender, user_reciever))
+    |> Multi.run(:get_sender_step, get_sender(id_sender))
+    |> Multi.run(:get_reciever_step, get_reciever(cpf_reciever))
     |> Multi.run(:verify_balances_step, verify_balances(amount))
     |> Multi.run(:subtract_from_a_step, &subtract_from_sender/2)
     |> Multi.run(:add_to_b_step, &add_to_reciever/2)
@@ -15,27 +18,40 @@ defmodule Potinho.Transaction.Create do
     |> Repo.transaction()
   end
 
-  defp get_users(user_sender_cpf, user_reciever_cpf) do
+  defp get_sender(id_sender) do
     fn repo, _ ->
-      case from(user in User, where: user.cpf in [^user_sender_cpf, ^user_reciever_cpf],
-      lock: "FOR UPDATE NOWAIT") |> repo.all() do
-        [user_a, user_b] -> {:ok, {user_a, user_b}}
-        _ -> {:error, :user_not_found}
+      case from(user in User, where: user.id == ^id_sender,
+      lock: "FOR UPDATE NOWAIT") |> repo.one() do
+        nil -> {:error, :user_not_found}
+        user_reciever -> {:ok, user_reciever}
+      end
+    end
+  end
+
+  defp get_reciever(cpf_reciever) do
+    fn repo, _ ->
+      case from(user in User, where: user.cpf == ^cpf_reciever,
+      lock: "FOR UPDATE NOWAIT") |> repo.one() do
+        nil -> {:error, :user_not_found}
+        user_reciever -> {:ok, user_reciever}
       end
     end
   end
 
   defp verify_balances(transfer_amount) do
-    fn _repo, %{retrieve_users_step: {user_sender, user_reciever}} ->
-      if user_sender.balance < transfer_amount,
+    fn _repo, %{get_sender_step: user_sender, get_reciever_step: user_reciever} ->
+      IO.inspect(user_sender)
+      IO.inspect(user_sender.balance.amount)
+      IO.inspect(transfer_amount.amount)
+      if user_sender.balance.amount < transfer_amount.amount,
         do: {:error, :balance_too_low},
-        else: {:ok, {user_sender, user_reciever, transfer_amount}}
+        else: {:ok, {user_sender, user_reciever, transfer_amount.amount}}
     end
   end
 
   defp subtract_from_sender(repo, %{verify_balances_step: {user_sender, _, verified_amount}}) do
     user_sender
-    |> User.changeset(%{balance: user_sender.balance - verified_amount})
+    |> User.changeset(%{balance: user_sender.balance Money.subtract() - verified_amount})
     |> repo.update()
   end
 

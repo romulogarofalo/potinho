@@ -8,8 +8,8 @@ defmodule Potinho.Transaction do
     field :amount, Money.Ecto.Amount.Type
     field :user_sender, :string, virtual: true
     field :user_reciever, :string, virtual: true
-    belongs_to :user_sender, User, foreign_key: :username_sender_id
-    belongs_to :user_reciever, User, foreign_key: :username_reciever_id
+    belongs_to :user_sender_id, User, foreign_key: :username_sender_id
+    belongs_to :user_reciever_id, User, foreign_key: :username_reciever_id
 
     timestamps()
   end

@@ -10,5 +10,7 @@ defmodule Potinho.Repo.Migrations.CreateTransactionTable do
       add :is_chargeback, :bool, default: false
       timestamps()
     end
+
+    create index(:transactions, [:user_sender_id, :inserteda_at])
   end
 end

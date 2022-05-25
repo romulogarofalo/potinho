@@ -20,6 +20,8 @@ defmodule PotinhoWeb.Router do
     pipe_through [:api, :auth]
 
     post "/transaction", TransactionController, :create
+    get "/transactions", TransactionController, :index
+    get "/balance", UserController, :show
   end
 
 

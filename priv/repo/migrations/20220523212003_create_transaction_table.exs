@@ -11,6 +11,7 @@ defmodule Potinho.Repo.Migrations.CreateTransactionTable do
       timestamps()
     end
 
-    create index(:transactions, [:user_sender_id, :inserteda_at])
+    create index(:transactions, [:user_sender_id, :inserted_at])
+    create index(:transactions, [:user_sender_id, :id])
   end
 end

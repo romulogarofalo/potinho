@@ -16,6 +16,7 @@ defmodule PotinhoWeb.ConnCase do
   """
 
   use ExUnit.CaseTemplate
+  alias Ecto.Adapters.SQL.Sandbox
 
   using do
     quote do
@@ -24,6 +25,7 @@ defmodule PotinhoWeb.ConnCase do
       import Phoenix.ConnTest
       import PotinhoWeb.ConnCase
 
+      alias Potinho.Repo
       alias PotinhoWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing

@@ -21,10 +21,9 @@ defmodule PotinhoWeb.Router do
 
     post "/transaction", TransactionController, :create
     get "/transactions", TransactionController, :index
+    post "/chargeback", TransactionController, :chargeback
     get "/balance", UserController, :show
   end
-
-
 
   # Enables LiveDashboard only for development
   #

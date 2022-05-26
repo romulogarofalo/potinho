@@ -1,5 +1,4 @@
 defmodule Potinho.Transaction.Create do
-
   alias Ecto.Multi
   alias Potinho.User
   alias Potinho.Transaction
@@ -20,8 +19,11 @@ defmodule Potinho.Transaction.Create do
 
   defp get_sender(id_sender) do
     fn repo, _ ->
-      case from(user in User, where: user.id == ^id_sender,
-      lock: "FOR UPDATE NOWAIT") |> repo.one() do
+      case from(user in User,
+             where: user.id == ^id_sender,
+             lock: "FOR UPDATE NOWAIT"
+           )
+           |> repo.one() do
         nil -> {:error, :user_not_found}
         user_reciever -> {:ok, user_reciever}
       end
@@ -30,8 +32,11 @@ defmodule Potinho.Transaction.Create do
 
   defp get_reciever(cpf_reciever) do
     fn repo, _ ->
-      case from(user in User, where: user.cpf == ^cpf_reciever,
-      lock: "FOR UPDATE NOWAIT") |> repo.one() do
+      case from(user in User,
+             where: user.cpf == ^cpf_reciever,
+             lock: "FOR UPDATE NOWAIT"
+           )
+           |> repo.one() do
         nil -> {:error, :user_not_found}
         user_reciever -> {:ok, user_reciever}
       end
@@ -58,14 +63,14 @@ defmodule Potinho.Transaction.Create do
     |> repo.update()
   end
 
-  defp create_transaction(repo, %{verify_balances_step: {user_sender, user_reciever, verified_amount}}) do
-    Transaction.create_changeset(
-      %{
-        user_sender_id: user_sender.id,
-        user_reciever_id: user_reciever.id,
-        amount: verified_amount
-      }
-    )
+  defp create_transaction(repo, %{
+         verify_balances_step: {user_sender, user_reciever, verified_amount}
+       }) do
+    Transaction.create_changeset(%{
+      user_sender_id: user_sender.id,
+      user_reciever_id: user_reciever.id,
+      amount: verified_amount
+    })
     |> repo.insert(returning: true)
   end
 end

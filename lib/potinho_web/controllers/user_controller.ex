@@ -13,12 +13,12 @@ defmodule PotinhoWeb.UserController do
         |> render("created.json", %{user: user})
 
       {:error,
-        %Ecto.Changeset{
-          errors: [
-            cpf:
-              {"has already been taken", [constraint: :unique, constraint_name: "users_cpf_index"]}
-          ]
-        }} ->
+       %Ecto.Changeset{
+         errors: [
+           cpf:
+             {"has already been taken", [constraint: :unique, constraint_name: "users_cpf_index"]}
+         ]
+       }} ->
         ErrorHandler.conflict(conn)
 
       {:error, %Ecto.Changeset{}} ->
@@ -31,10 +31,10 @@ defmodule PotinhoWeb.UserController do
 
   def show(conn) do
     with %{"id" => user_sender_id} <- Guardian.Plug.current_resource(conn),
-      {:ok, user} <- Get.balance(user_sender_id) do
+         {:ok, user} <- Get.balance(user_sender_id) do
       conn
-        |> put_status(:ok)
-        |> render("show.json", %{user: user})
+      |> put_status(:ok)
+      |> render("show.json", %{user: user})
     end
   end
 end

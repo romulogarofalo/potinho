@@ -31,6 +31,6 @@ defmodule Potinho.Version do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:patch, :entity_id, :entity_schema, :action, :recorded_at, :rollback])
-    |> cast(params, [:user_id]) # custom fields
+    |> cast(params, [:user_id])
   end
 end

@@ -1,5 +1,4 @@
 defmodule Potinho.Transaction do
-
   use Ecto.Schema
   import Ecto.Changeset
   alias Potinho.User

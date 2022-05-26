@@ -14,6 +14,7 @@ defmodule Potinho.User.Get do
 
   def balance(user_id) do
     user = Repo.get!(User, %{id: user_id})
+
     if not is_nil(user) do
       {:ok, user}
     else

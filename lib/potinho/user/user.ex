@@ -39,11 +39,12 @@ defmodule Potinho.User do
 
   def validate_cpf(_, cpf) do
     # fn :cpf, cpf ->
-      if Brcpfcnpj.cpf_valid?(cpf) do
-        []
-      else
-        [cpf: "invalid format"]
-      end
+    if Brcpfcnpj.cpf_valid?(cpf) do
+      []
+    else
+      [cpf: "invalid format"]
+    end
+
     # end
   end
 end

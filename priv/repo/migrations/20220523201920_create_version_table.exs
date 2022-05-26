@@ -3,7 +3,6 @@ defmodule Potinho.Repo.Migrations.CreateVersionTable do
 
   def change do
     create table(:versions, primary_key: false) do
-
       add :id, :uuid, primary_key: true, null: false, default: fragment("gen_random_uuid()")
       # The patch in Erlang External Term Format
       add :patch, :binary
@@ -23,7 +22,8 @@ defmodule Potinho.Repo.Migrations.CreateVersionTable do
       # was this change part of a rollback?
       add :rollback, :boolean, default: false
 
-      add :user_id, references(:users, on_update: :update_all, on_delete: :nilify_all, type: :uuid)
+      add :user_id,
+          references(:users, on_update: :update_all, on_delete: :nilify_all, type: :uuid)
     end
 
     # create this if you are going to have more than a hundred of thousands of versions

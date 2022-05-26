@@ -1,5 +1,4 @@
 defmodule Potinho.Transaction.Index.Input do
-
   use Ecto.Schema
   import Ecto.Changeset
 

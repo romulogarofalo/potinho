@@ -3,5 +3,5 @@ defmodule Potinho.Repo do
     otp_app: :potinho,
     adapter: Ecto.Adapters.Postgres
 
-    use ExAudit.Repo
+  use ExAudit.Repo
 end

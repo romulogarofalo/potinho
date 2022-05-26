@@ -17,7 +17,6 @@ config :potinho, PotinhoWeb.Endpoint,
   pubsub_server: Potinho.PubSub,
   live_view: [signing_salt: "yrH1DZF7"]
 
-
 config :ex_audit,
   ecto_repos: [Potinho.Repo],
   version_schema: Potinho.Version,
@@ -66,5 +65,4 @@ config :potinho, Potinho.Guardian,
   issuer: "potinho",
   secret_key: "2W5jhBgVuRxsa/tWDzdov9dudbtOLXS/cwB6XLynGWbAuKkuI47WmI1fHDsjsy1n"
 
-config :potinho, PotinhoWeb.Auth.Pipeline,
-  module: Potinho.Guardian
+config :potinho, PotinhoWeb.Auth.Pipeline, module: Potinho.Guardian

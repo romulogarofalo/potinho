@@ -16,7 +16,7 @@ defmodule PotinhoWeb.UserView do
       user: %{
         cpf: user.cpf,
         balance: user.balance,
-        full_name_user: user.full_name_user,
+        full_name_user: user.full_name_user
       }
     }
   end

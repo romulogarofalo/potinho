@@ -9,4 +9,8 @@ defmodule PotinhoWeb.TransactionView do
   def render("index.json", transactions) do
     transactions
   end
+
+  def render("chargeback.json", _) do
+    %{}
+  end
 end

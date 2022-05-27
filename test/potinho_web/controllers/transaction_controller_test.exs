@@ -6,9 +6,6 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
   alias Potinho.User.Create
   alias Potinho.Guardian
-  alias Potinho.Version
-  alias Potinho.Transaction
-  alias Potinho.User
 
   describe "POST /api/transaction" do
     setup %{conn: conn} do
@@ -17,7 +14,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
       cpf = Brcpfcnpj.cpf_generate()
 
       full_name2 = "Polvo bbb bbb"
-      password2 = "123123"
+      password2 = "321321"
       cpf2 = Brcpfcnpj.cpf_generate()
 
       params = %{
@@ -28,8 +25,8 @@ defmodule PotinhoWeb.TransactionControllerTest do
       }
 
       params2 = %{
-        "full_name_user" => full_name,
-        "password" => password,
+        "full_name_user" => full_name2,
+        "password" => password2,
         "cpf" => cpf2,
         "balance" => "200.50"
       }
@@ -49,7 +46,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
       }
     end
 
-    test "with ok params and balance", %{conn: conn, user1_token: token, user2: user2} do
+    test "with ok params and balance", %{conn: conn, user2: user2} do
       params = %{
         "cpf_reciever" => user2["cpf"],
         "amount" => "300"
@@ -57,10 +54,10 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
       response = post(conn, Routes.transaction_path(conn, :create), params)
 
-      # IO.inspect(response.body_params)
-      # IO.inspect(Potinho.Repo.all(User))
-      # IO.inspect(Potinho.Repo.all(Transaction))
-      # IO.inspect(Potinho.Repo.all(Version))
+      assert response.status == 201
+      # assert response.resp_body == "{\"transaction_id\":\"13863468-1c32-4d3f-b6dc-d320cf6c8956\"}"
+
+      IO.inspect(response)
     end
   end
 
@@ -77,18 +74,18 @@ defmodule PotinhoWeb.TransactionControllerTest do
       cpf = Brcpfcnpj.cpf_generate()
 
       full_name2 = "Polvo bbb bbb"
-      password2 = "123123"
+      password2 = "321321"
       cpf2 = Brcpfcnpj.cpf_generate()
 
       params = %{
         "full_name_user" => full_name,
-        "password" => password,
+        "password" => password2,
         "cpf" => cpf,
         "balance" => "1000.50"
       }
 
       params2 = %{
-        "full_name_user" => full_name,
+        "full_name_user" => full_name2,
         "password" => password,
         "cpf" => cpf2,
         "balance" => "200.50"
@@ -108,8 +105,6 @@ defmodule PotinhoWeb.TransactionControllerTest do
           id_sender: id
         })
 
-      IO.inspect(transaction)
-
       %{
         conn: conn,
         user1: user1,
@@ -121,8 +116,6 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
     test "with ok params and balance", %{
       conn: conn,
-      user1: user1,
-      user2: user2,
       transaction_id: transaction_id
     } do
       params = %{

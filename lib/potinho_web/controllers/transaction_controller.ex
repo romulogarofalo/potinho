@@ -36,8 +36,8 @@ defmodule PotinhoWeb.TransactionController do
     with %{"id" => user_id} <- Guardian.Plug.current_resource(conn),
          {:ok, transaction} <- Chargeback.run(transaction_id, user_id) do
       conn
-      |> put_status(:created)
-      |> render("created.json", transaction)
+      |> put_status(:no_content)
+      |> render("chargeback.json", transaction)
     end
   end
 end

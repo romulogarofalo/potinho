@@ -7,7 +7,7 @@ defmodule Potinho.Repo.Migrations.CreateTransactionTable do
       add :user_sender_id, references(:users, type: :uuid)
       add :user_reciever_id, references(:users, type: :uuid)
       add :amount, :integer
-      add :is_chargeback, :bool, default: false
+      add :is_chargeback, :bool, null: false, default: false
       timestamps()
     end
 

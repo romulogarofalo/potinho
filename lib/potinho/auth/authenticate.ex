@@ -11,7 +11,7 @@ defmodule Potinho.Auth.Authenticate do
     with {:ok, %User{password_hash: password_hash, cpf: cpf, id: id}} <-
            Get.user_from_cpf(params),
          {:ok, true} <- check_password_hash(password_hash, params),
-         {:ok, token, _decoded} <- Guardian.encode_and_sign(Jason.encode!(%{cpf: cpf, id: id})) do
+         {:ok, token, _decoded} <- Guardian.encode_and_sign(%{cpf: cpf, id: id}) do
       {:ok, token}
     else
       {:error, :not_found} ->

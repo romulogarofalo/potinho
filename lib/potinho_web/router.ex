@@ -9,6 +9,10 @@ defmodule PotinhoWeb.Router do
     plug PotinhoWeb.Auth.Pipeline
   end
 
+  pipeline :ensure_authed_access do
+    plug Guardian.Plug.EnsureAuthenticated
+  end
+
   scope "/api", PotinhoWeb do
     pipe_through :api
 
@@ -17,7 +21,7 @@ defmodule PotinhoWeb.Router do
   end
 
   scope "/api", PotinhoWeb do
-    pipe_through [:api, :auth]
+    pipe_through [:api, :auth, :ensure_authed_access]
 
     post "/transaction", TransactionController, :create
     get "/transactions", TransactionController, :index

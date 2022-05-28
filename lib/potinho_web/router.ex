@@ -10,7 +10,7 @@ defmodule PotinhoWeb.Router do
   end
 
   pipeline :ensure_authed_access do
-    plug Guardian.Plug.EnsureAuthenticated
+    plug Guardian.Plug.EnsureAuthenticated, handler: PotinhoWeb.HttpAuthErrorHandler
   end
 
   scope "/api", PotinhoWeb do

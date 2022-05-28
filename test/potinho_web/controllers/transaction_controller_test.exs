@@ -137,6 +137,17 @@ defmodule PotinhoWeb.TransactionControllerTest do
       assert response.status == 401
       assert response.resp_body == "{\"message\":\"invalid token\"}"
     end
+
+    test "when send wrong params", %{conn: conn, user1: user1} do
+      params = %{
+        "asdasd" => Brcpfcnpj.cpf_generate(),
+        "asdads" => "200"
+      }
+
+      response = post(conn, Routes.transaction_path(conn, :create), params)
+      assert response.status == 400
+      assert response.resp_body == "{\"message\":\"invalid token\"}"
+    end
   end
 
   describe "GET /api/transaction" do
@@ -193,7 +204,17 @@ defmodule PotinhoWeb.TransactionControllerTest do
           amount: %{amount: 20000},
           id_sender: user3.id
         })
-      {:ok, %{create_transaction_register: transaction3}} =
+      {:ok, transaction3} =
+        %Potinho.Transaction{
+          user_reciever_id: user2.id,
+          amount: 25000,
+          user_sender_id: user3.id,
+          is_chargeback: false,
+          inserted_at: NaiveDateTime.new!(~D[2021-01-13], ~T[23:00:07]),
+          updated_at: NaiveDateTime.new!(~D[2021-01-13], ~T[23:00:07])
+        } |> Repo.insert()
+
+      {:ok, %{create_transaction_register: transaction4}} =
         Potinho.Transaction.Create.run(%{
           cpf_reciever: cpf,
           amount: %{amount: 30000},
@@ -206,14 +227,67 @@ defmodule PotinhoWeb.TransactionControllerTest do
         user1_token: token,
         user2: user2,
         user3: user3,
-        transaction_id: transaction.id
+        transaction1: transaction1,
+        transaction2: transaction2,
+        transaction3: transaction3
       }
     end
 
-    test "with rigth range", %{conn: conn} do
-      response = post(conn, Routes.transaction_path(conn, :index), params)
-      IO.inspect(response.resp_body)
+    test "with rigth range",
+      %{conn: conn,
+        transaction1: from_db_transaction1,
+        transaction2: from_db_transaction2
+      } do
+      params = %{
+        initial_date: "2022-01-20T20:08:21.634121",
+        end_date: "2022-12-20T20:08:21.634121"
+      }
+
+      response = get(conn, Routes.transaction_path(conn, :index), params)
+
+      [transaction1, transaction2] = Jason.decode!(response.resp_body)
+      assert response.status == 200
+      assert transaction1["transaction_id"] == from_db_transaction1.id
+      assert transaction1["amount"] == from_db_transaction1.amount.amount
+      assert transaction2["transaction_id"] == from_db_transaction2.id
+      assert transaction2["amount"] == from_db_transaction2.amount.amount
     end
+
+    test "with wrong range", %{conn: conn} do
+      params = %{
+        initial_date: "2025-01-20T20:08:21.634121",
+        end_date: "2012-12-20T20:08:21.634121"
+      }
+
+      response = get(conn, Routes.transaction_path(conn, :index), params)
+      response.status == 200
+      response.resp_body == []
+    end
+
+    test "with wrong input", %{conn: conn} do
+      params = %{
+        qaaaa: "2025-01-20T20:08:21.634121",
+        bb: "2012-12-20T20:08:21.634121"
+      }
+
+      response = get(conn, Routes.transaction_path(conn, :index), params)
+      assert response.status == 400
+      assert response.resp_body == "{\"message\":\"bad_request\"}"
+    end
+
+    test "with no token", %{conn: conn} do
+      conn_with_wrong_token = put_req_header(conn, "authorization", "")
+
+      params = %{
+        initial_date: "2025-01-20T20:08:21.634121",
+        end_date: "2012-12-20T20:08:21.634121"
+      }
+
+      response = get(conn_with_wrong_token, Routes.transaction_path(conn, :index), params)
+      assert response.resp_body == "{\"message\":\"unauthorized\"}"
+      assert response.status == 401
+    end
+
   end
 
   describe "POST /api/chargeback" do
@@ -368,6 +442,16 @@ defmodule PotinhoWeb.TransactionControllerTest do
       response = post(conn_with_wrong_token, Routes.transaction_path(conn, :chargeback), params)
       assert response.status == 401
       assert response.resp_body == "{\"message\":\"invalid token\"}"
+    end
+
+    test "when send wrong params", %{conn: conn, user1: user1} do
+      params = %{
+        "asdasd" => Ecto.UUID.generate()
+      }
+
+      response = post(conn, Routes.transaction_path(conn, :chargeback), params)
+      assert response.status == 400
+      assert response.resp_body == "{\"message\":\"bad_request\"}"
     end
   end
 end

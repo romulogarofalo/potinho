@@ -26,6 +26,8 @@ defmodule PotinhoWeb.TransactionController do
         ErrorHandler.not_found(conn, "cpf not found")
       {:error, :tabela_ta_em_lock} ->
         ErrorHandler.internal_server_error(conn)
+      {:error, %Ecto.Changeset{}} ->
+        ErrorHandler.bad_request(conn)
       error ->
         Logger.error("#{__MODULE__}.create error=#{error}")
         ErrorHandler.internal_server_error(conn)
@@ -37,14 +39,16 @@ defmodule PotinhoWeb.TransactionController do
          new_map <- Map.merge(params, %{"user_id" => user_sender_id}),
          {:ok, %{user_id: user_id, initial_date: initial_date, end_date: end_date}} <-
            IndexInput.validate(new_map),
-         {:ok, transactions} <- Index.run(user_id, initial_date, end_date) do
-
+         transactions <- Index.run(user_id, initial_date, end_date) do
       conn
       |> put_status(:ok)
-      |> render("index.json", transactions)
+      |> render("index.json", %{transactions: transactions})
     else
-      {:error, message} ->
-        IO.inspect(message, label: "error?")
+      {:error, %Ecto.Changeset{}} ->
+          ErrorHandler.bad_request(conn)
+      error ->
+        Logger.error("#{__MODULE__}.create error=#{error}")
+        ErrorHandler.internal_server_error(conn)
     end
   end
 
@@ -59,9 +63,15 @@ defmodule PotinhoWeb.TransactionController do
         ErrorHandler.bad_request(conn, "chargeback is not possible")
       {:error, :get_transaction_step, _, _} ->
         ErrorHandler.not_found(conn, "transaction not found")
+      {:error, %Ecto.Changeset{}} ->
+        ErrorHandler.bad_request(conn)
       error ->
         Logger.error("#{__MODULE__}.chargeback error=#{error}")
         ErrorHandler.internal_server_error(conn)
     end
+  end
+
+  def chargeback(conn, _) do
+    ErrorHandler.bad_request(conn)
   end
 end

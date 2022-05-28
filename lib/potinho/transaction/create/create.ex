@@ -57,7 +57,10 @@ defmodule Potinho.Transaction.Create do
     |> repo.update()
   end
 
-  defp add_to_reciever(repo, %{verify_balances_step: {_, verified_amount}, get_reciever_step: user_reciever}) do
+  defp add_to_reciever(repo, %{
+         verify_balances_step: {_, verified_amount},
+         get_reciever_step: user_reciever
+       }) do
     user_reciever
     |> User.changeset(%{balance: Money.add(user_reciever.balance, verified_amount)})
     |> repo.update()

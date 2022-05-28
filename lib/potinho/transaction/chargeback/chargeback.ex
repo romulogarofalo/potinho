@@ -29,34 +29,42 @@ defmodule Potinho.Transaction.Chargeback do
       |> case do
         nil ->
           {:error, :transaction_not_found}
-          transaction ->
-            {:ok, transaction}
-          end
+
+        transaction ->
+          {:ok, transaction}
+      end
     end
   end
 
-  def check_balance_for_chargeback(_repo,
-    %{
-      get_transaction_step: %{
-        amount: amount_transaction,
-        user_reciever: %{
-          balance: %{amount: reciever_amount}
-        } = user_reciever,
-        user_sender: user_sender
-      }
-    }) do
-      if reciever_amount < amount_transaction.amount,
-        do: {:error, :balance_too_low},
-        else: {:ok, {user_sender, user_reciever, amount_transaction.amount}}
+  def check_balance_for_chargeback(
+        _repo,
+        %{
+          get_transaction_step: %{
+            amount: amount_transaction,
+            user_reciever:
+              %{
+                balance: %{amount: reciever_amount}
+              } = user_reciever,
+            user_sender: user_sender
+          }
+        }
+      ) do
+    if reciever_amount < amount_transaction.amount,
+      do: {:error, :balance_too_low},
+      else: {:ok, {user_sender, user_reciever, amount_transaction.amount}}
   end
 
-  def subtract_from_reciever(repo, %{verify_balance_step: {_user_sender, user_reciever, amount_transaction}}) do
+  def subtract_from_reciever(repo, %{
+        verify_balance_step: {_user_sender, user_reciever, amount_transaction}
+      }) do
     user_reciever
     |> User.changeset(%{balance: Money.subtract(user_reciever.balance, amount_transaction)})
     |> repo.update()
   end
 
-  def add_to_sender(repo, %{verify_balance_step: {user_sender, _user_reciever, amount_transaction}}) do
+  def add_to_sender(repo, %{
+        verify_balance_step: {user_sender, _user_reciever, amount_transaction}
+      }) do
     user_sender
     |> User.changeset(%{balance: Money.add(user_sender.balance, amount_transaction)})
     |> repo.update()

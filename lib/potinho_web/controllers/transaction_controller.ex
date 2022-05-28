@@ -22,12 +22,16 @@ defmodule PotinhoWeb.TransactionController do
     else
       {:error, :verify_balances_step, :balance_too_low, _} ->
         ErrorHandler.bad_request(conn, "balance too low")
+
       {:error, :get_reciever_step, :user_not_found, _} ->
         ErrorHandler.not_found(conn, "cpf not found")
+
       {:error, :tabela_ta_em_lock} ->
         ErrorHandler.internal_server_error(conn)
+
       {:error, %Ecto.Changeset{}} ->
         ErrorHandler.bad_request(conn)
+
       error ->
         Logger.error("#{__MODULE__}.create error=#{error}")
         ErrorHandler.internal_server_error(conn)
@@ -45,7 +49,8 @@ defmodule PotinhoWeb.TransactionController do
       |> render("index.json", %{transactions: transactions})
     else
       {:error, %Ecto.Changeset{}} ->
-          ErrorHandler.bad_request(conn)
+        ErrorHandler.bad_request(conn)
+
       error ->
         Logger.error("#{__MODULE__}.create error=#{error}")
         ErrorHandler.internal_server_error(conn)
@@ -61,10 +66,13 @@ defmodule PotinhoWeb.TransactionController do
     else
       {:error, :verify_balance_step, :balance_too_low, _} ->
         ErrorHandler.bad_request(conn, "chargeback is not possible")
+
       {:error, :get_transaction_step, _, _} ->
         ErrorHandler.not_found(conn, "transaction not found")
+
       {:error, %Ecto.Changeset{}} ->
         ErrorHandler.bad_request(conn)
+
       error ->
         Logger.error("#{__MODULE__}.chargeback error=#{error}")
         ErrorHandler.internal_server_error(conn)

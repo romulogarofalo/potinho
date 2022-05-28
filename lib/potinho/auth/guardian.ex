@@ -2,6 +2,7 @@ defmodule Potinho.Guardian do
   use Guardian, otp_app: :potinho
 
   alias Potinho.User.Get
+
   def subject_for_token(%{cpf: cpf, id: id}, _claims) do
     # You can use any value for the subject of your token but
     # it should be useful in retrieving the resource later, see
@@ -14,9 +15,11 @@ defmodule Potinho.Guardian do
 
   def subject_for_token(data, _) do
     %{"cpf" => cpf} = Jason.decode!(data)
+
     case Get.user_from_cpf(%{cpf: cpf}) do
       {:ok, %{cpf: cpf, id: id}} ->
         {:ok, Jason.encode!(%{cpf: cpf, id: id})}
+
       {:error, :not_found} ->
         {:error, :reason_for_error}
     end

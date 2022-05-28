@@ -72,8 +72,8 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
       assert response.status == 201
       assert response.resp_body == "{\"transaction_id\":\"#{transaction.id}\"}"
-      assert user1.balance.amount == (100050 - 30000)
-      assert user2.balance.amount == (20050 + 30000)
+      assert user1.balance.amount == 100_050 - 30000
+      assert user2.balance.amount == 20050 + 30000
       assert user3.balance.amount == 40050
     end
 
@@ -83,21 +83,21 @@ defmodule PotinhoWeb.TransactionControllerTest do
         "amount" => "201"
       }
 
-    response = post(conn, Routes.transaction_path(conn, :create), params)
+      response = post(conn, Routes.transaction_path(conn, :create), params)
 
-    [transaction] = Repo.all(Potinho.Transaction)
-    [user3db, user2db, user1db] = Enum.sort(Repo.all(Potinho.User))
+      [transaction] = Repo.all(Potinho.Transaction)
+      [user3db, user2db, user1db] = Enum.sort(Repo.all(Potinho.User))
 
-    assert response.status == 201
-    assert response.resp_body == "{\"transaction_id\":\"#{transaction.id}\"}"
+      assert response.status == 201
+      assert response.resp_body == "{\"transaction_id\":\"#{transaction.id}\"}"
 
-    #  the sort is using the balance so need to check the id
-    assert user1db.balance.amount == 100050
-    assert user1.id == user1db.id
-    assert user2db.balance.amount == 40050
-    assert user2.id == user3db.id
-    assert user3db.balance.amount == 20050
-    assert user3.id == user2db.id
+      #  the sort is using the balance so need to check the id
+      assert user1db.balance.amount == 100_050
+      assert user1.id == user1db.id
+      assert user2db.balance.amount == 40050
+      assert user2.id == user3db.id
+      assert user3db.balance.amount == 20050
+      assert user3.id == user2db.id
     end
 
     test "when has no founds", %{conn: conn, user2: user2} do
@@ -112,7 +112,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
       assert response.status == 400
     end
 
-    test "when reciever do not exists", %{conn: conn, user1: user1}  do
+    test "when reciever do not exists", %{conn: conn, user1: user1} do
       params = %{
         "cpf_reciever" => Brcpfcnpj.cpf_generate(),
         "amount" => "200"
@@ -123,11 +123,12 @@ defmodule PotinhoWeb.TransactionControllerTest do
       assert response.resp_body == "{\"message\":\"cpf not found\"}"
 
       user_to_test = Repo.get_by(Potinho.User, %{id: user1.id})
-      assert user_to_test.balance.amount == 100050
+      assert user_to_test.balance.amount == 100_050
     end
 
     test "when is unauthorized", %{conn: conn, user1: user1} do
       conn_with_wrong_token = put_req_header(conn, "authorization", "Bearer not a token")
+
       params = %{
         "cpf_reciever" => Brcpfcnpj.cpf_generate(),
         "amount" => "200"
@@ -177,6 +178,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
         "cpf" => cpf2,
         "balance" => "200.50"
       }
+
       params3 = %{
         "full_name_user" => full_name3,
         "password" => password3,
@@ -188,7 +190,8 @@ defmodule PotinhoWeb.TransactionControllerTest do
       {:ok, user2} = Create.run(params2)
       {:ok, user3} = Create.run(params3)
 
-      {:ok, token, _decoded} = Guardian.encode_and_sign(Jason.encode!(%{cpf: user3.cpf, id: user3.id}))
+      {:ok, token, _decoded} =
+        Guardian.encode_and_sign(Jason.encode!(%{cpf: user3.cpf, id: user3.id}))
 
       conn = put_req_header(conn, "authorization", "Bearer #{token}")
 
@@ -198,12 +201,14 @@ defmodule PotinhoWeb.TransactionControllerTest do
           amount: %{amount: 10000},
           id_sender: user3.id
         })
+
       {:ok, %{create_transaction_register: transaction2}} =
         Potinho.Transaction.Create.run(%{
           cpf_reciever: cpf2,
           amount: %{amount: 20000},
           id_sender: user3.id
         })
+
       {:ok, transaction3} =
         %Potinho.Transaction{
           user_reciever_id: user2.id,
@@ -212,7 +217,8 @@ defmodule PotinhoWeb.TransactionControllerTest do
           is_chargeback: false,
           inserted_at: NaiveDateTime.new!(~D[2021-01-13], ~T[23:00:07]),
           updated_at: NaiveDateTime.new!(~D[2021-01-13], ~T[23:00:07])
-        } |> Repo.insert()
+        }
+        |> Repo.insert()
 
       {:ok, %{create_transaction_register: transaction4}} =
         Potinho.Transaction.Create.run(%{
@@ -234,10 +240,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
     end
 
     test "with rigth range",
-      %{conn: conn,
-        transaction1: from_db_transaction1,
-        transaction2: from_db_transaction2
-      } do
+         %{conn: conn, transaction1: from_db_transaction1, transaction2: from_db_transaction2} do
       params = %{
         initial_date: "2022-01-20T20:08:21.634121",
         end_date: "2022-12-20T20:08:21.634121"
@@ -287,7 +290,6 @@ defmodule PotinhoWeb.TransactionControllerTest do
       assert response.resp_body == "{\"message\":\"unauthorized\"}"
       assert response.status == 401
     end
-
   end
 
   describe "POST /api/chargeback" do
@@ -304,7 +306,6 @@ defmodule PotinhoWeb.TransactionControllerTest do
       password3 = "111111"
       cpf3 = Brcpfcnpj.cpf_generate()
 
-
       params = %{
         "full_name_user" => full_name,
         "password" => password2,
@@ -318,6 +319,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
         "cpf" => cpf2,
         "balance" => "200.50"
       }
+
       params3 = %{
         "full_name_user" => full_name3,
         "password" => password3,
@@ -367,7 +369,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
       assert user_2_amount == 40050
       assert user_1_amount == 80050
-      assert user_3_amount == 7000050
+      assert user_3_amount == 7_000_050
 
       response = post(conn, Routes.transaction_path(conn, :chargeback), params)
       assert response.status == 204
@@ -377,8 +379,8 @@ defmodule PotinhoWeb.TransactionControllerTest do
       %{balance: %{amount: user_3_chagebacked}} = Repo.get_by(Potinho.User, id: user3.id)
 
       assert user_2_chagebacked == 20050
-      assert user_1_chagebacked == 100050
-      assert user_3_chagebacked == 7000050
+      assert user_1_chagebacked == 100_050
+      assert user_3_chagebacked == 7_000_050
 
       [%{is_chargeback: is_chargeback}] = Potinho.Repo.all(Potinho.Transaction)
       assert is_chargeback
@@ -418,7 +420,9 @@ defmodule PotinhoWeb.TransactionControllerTest do
       assert user_2_chagebacked == 10050
       assert user_1_chagebacked == 80050
 
-      [%{is_chargeback: is_chargeback}, %{is_chargeback: is_chargeback2}] = Potinho.Repo.all(Potinho.Transaction)
+      [%{is_chargeback: is_chargeback}, %{is_chargeback: is_chargeback2}] =
+        Potinho.Repo.all(Potinho.Transaction)
+
       assert not is_chargeback
       assert not is_chargeback2
     end
@@ -435,6 +439,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
     test "when is unauthorized", %{conn: conn, user1: user1} do
       conn_with_wrong_token = put_req_header(conn, "authorization", "Bearer not a token")
+
       params = %{
         "transaction_id" => Ecto.UUID.generate()
       }

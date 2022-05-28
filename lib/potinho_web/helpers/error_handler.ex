@@ -13,13 +13,15 @@ defmodule PotinhoWeb.Helpers.ErrorHandler do
     |> send_resp(409, Jason.encode!(%{message: "conflict"}))
   end
 
-  def internal_server_error(conn, msg \\ %{message: "internal_server_error"}) do
+  def internal_server_error(conn, msg \\ "internal_server_error") do
     conn
     |> put_resp_content_type("application/json")
-    |> send_resp(500, Jason.encode!(msg))
+    |> send_resp(500, Jason.encode!(%{message: msg}))
   end
 
-  def not_found(conn, msg \\ %{message: "not_found"}) do
-    send_resp(conn, 404, Jason.encode!(msg))
+  def not_found(conn, msg \\ "not_found") do
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(404, Jason.encode!(%{message: msg}))
   end
 end

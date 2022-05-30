@@ -15,12 +15,8 @@ defmodule PotinhoWeb.TransactionView do
     %{
       transaction_id: transaction.id,
       amount: transaction.amount.amount,
-      user_sender_name: transaction.user_reciever.full_name_user,
+      user_reciever_name: transaction.user_reciever.full_name_user,
       is_chargeback: transaction.is_chargeback
     }
-  end
-
-  def render("chargeback.json", _) do
-    %{}
   end
 end

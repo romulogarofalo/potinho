@@ -2,8 +2,6 @@ defmodule PotinhoWeb.TransactionControllerTest do
   use ExUnit.Case
   use PotinhoWeb.ConnCase
 
-  import Ecto.Query
-
   alias Potinho.User.Create
   alias Potinho.Guardian
 
@@ -126,7 +124,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
       assert user_to_test.balance.amount == 100_050
     end
 
-    test "when is unauthorized", %{conn: conn, user1: user1} do
+    test "when is unauthorized", %{conn: conn} do
       conn_with_wrong_token = put_req_header(conn, "authorization", "Bearer not a token")
 
       params = %{
@@ -136,10 +134,10 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
       response = post(conn_with_wrong_token, Routes.transaction_path(conn, :create), params)
       assert response.status == 401
-      assert response.resp_body == "{\"message\":\"invalid token\"}"
+      assert response.resp_body == "{\"message\":\"unauthorized\"}"
     end
 
-    test "when send wrong params", %{conn: conn, user1: user1} do
+    test "when send wrong params", %{conn: conn} do
       params = %{
         "asdasd" => Brcpfcnpj.cpf_generate(),
         "asdads" => "200"
@@ -147,7 +145,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
       response = post(conn, Routes.transaction_path(conn, :create), params)
       assert response.status == 400
-      assert response.resp_body == "{\"message\":\"invalid token\"}"
+      assert response.resp_body == "{\"message\":\"bad_request\"}"
     end
   end
 
@@ -167,7 +165,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
       params = %{
         "full_name_user" => full_name,
-        "password" => password2,
+        "password" => password,
         "cpf" => cpf,
         "balance" => "1000.50"
       }
@@ -186,7 +184,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
         "balance" => "70000.50"
       }
 
-      {:ok, %{cpf: cpf, id: id} = user1} = Create.run(params)
+      {:ok, %{cpf: cpf, id: _id} = user1} = Create.run(params)
       {:ok, user2} = Create.run(params2)
       {:ok, user3} = Create.run(params3)
 
@@ -220,7 +218,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
         }
         |> Repo.insert()
 
-      {:ok, %{create_transaction_register: transaction4}} =
+      {:ok, %{create_transaction_register: _transaction4}} =
         Potinho.Transaction.Create.run(%{
           cpf_reciever: cpf,
           amount: %{amount: 30000},
@@ -247,7 +245,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
       }
 
       response = get(conn, Routes.transaction_path(conn, :index), params)
-
+      IO.inspect(response)
       [transaction1, transaction2] = Jason.decode!(response.resp_body)
       assert response.status == 200
       assert transaction1["transaction_id"] == from_db_transaction1.id
@@ -263,8 +261,8 @@ defmodule PotinhoWeb.TransactionControllerTest do
       }
 
       response = get(conn, Routes.transaction_path(conn, :index), params)
-      response.status == 200
-      response.resp_body == []
+      assert response.status == 200
+      assert response.resp_body == "[]"
     end
 
     test "with wrong input", %{conn: conn} do
@@ -308,7 +306,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
       params = %{
         "full_name_user" => full_name,
-        "password" => password2,
+        "password" => password,
         "cpf" => cpf,
         "balance" => "1000.50"
       }
@@ -397,7 +395,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
         "transaction_id" => transaction_id
       }
 
-      {:ok, %{create_transaction_register: transaction}} =
+      {:ok, %{create_transaction_register: _transaction}} =
         Potinho.Transaction.Create.run(%{
           cpf_reciever: user3.cpf,
           amount: %{amount: 30000},
@@ -437,7 +435,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
       assert response.resp_body == "{\"message\":\"transaction not found\"}"
     end
 
-    test "when is unauthorized", %{conn: conn, user1: user1} do
+    test "when is unauthorized", %{conn: conn} do
       conn_with_wrong_token = put_req_header(conn, "authorization", "Bearer not a token")
 
       params = %{
@@ -446,10 +444,10 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
       response = post(conn_with_wrong_token, Routes.transaction_path(conn, :chargeback), params)
       assert response.status == 401
-      assert response.resp_body == "{\"message\":\"invalid token\"}"
+      assert response.resp_body == "{\"message\":\"unauthorized\"}"
     end
 
-    test "when send wrong params", %{conn: conn, user1: user1} do
+    test "when send wrong params", %{conn: conn} do
       params = %{
         "asdasd" => Ecto.UUID.generate()
       }

@@ -145,7 +145,6 @@ client = Tesla.client(middlewares, adapter)
     ]
   )
 
-# IO.inspect(body)
 IO.puts("status: #{status}")
 Kino.DataTable.new(body)
 ```

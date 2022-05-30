@@ -38,10 +38,10 @@ defmodule Potinho.Transaction.Chargeback do
   end
 
   def verify_charback(_repo, %{
-    get_transaction_step: %{
-      is_chargeback: is_chargeback
-    }
-  }) do
+        get_transaction_step: %{
+          is_chargeback: is_chargeback
+        }
+      }) do
     if is_chargeback do
       {:error, :chargeback_already_done}
     else

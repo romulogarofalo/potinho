@@ -86,7 +86,6 @@ client = Tesla.client(middlewares, adapter)
     headers: [{"content-type", "application/json"}]
   )
 
-# IO.inspect(response)
 IO.puts("status: #{status}")
 IO.puts("response body #{Jason.encode!(body)}")
 ```
@@ -119,7 +118,6 @@ client = Tesla.client(middlewares, adapter)
   response =
   Tesla.post!(client, api_url <> "/login", params, headers: [{"content-type", "application/json"}])
 
-# IO.inspect(response)
 IO.puts("status: #{status}")
 IO.puts("response body #{Jason.encode!(body)}")
 ```

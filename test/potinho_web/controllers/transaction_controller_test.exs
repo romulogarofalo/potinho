@@ -70,9 +70,9 @@ defmodule PotinhoWeb.TransactionControllerTest do
 
       assert response.status == 201
       assert response.resp_body == "{\"transaction_id\":\"#{transaction.id}\"}"
-      assert user1.balance.amount == 100_050 - 30000
-      assert user2.balance.amount == 20050 + 30000
-      assert user3.balance.amount == 40050
+      assert user1.balance.amount == 100_050 - 30_000
+      assert user2.balance.amount == 20_050 + 30_000
+      assert user3.balance.amount == 40_050
     end
 
     test "when transfer for itself", %{conn: conn, user1: user1, user2: user2, user3: user3} do
@@ -92,9 +92,9 @@ defmodule PotinhoWeb.TransactionControllerTest do
       #  the sort is using the balance so need to check the id
       assert user1db.balance.amount == 100_050
       assert user1.id == user1db.id
-      assert user2db.balance.amount == 40050
+      assert user2db.balance.amount == 40_050
       assert user2.id == user3db.id
-      assert user3db.balance.amount == 20050
+      assert user3db.balance.amount == 20_050
       assert user3.id == user2db.id
     end
 
@@ -196,21 +196,21 @@ defmodule PotinhoWeb.TransactionControllerTest do
       {:ok, %{create_transaction_register: transaction1}} =
         Potinho.Transaction.Create.run(%{
           cpf_reciever: cpf2,
-          amount: %{amount: 10000},
+          amount: %{amount: 10_000},
           id_sender: user3.id
         })
 
       {:ok, %{create_transaction_register: transaction2}} =
         Potinho.Transaction.Create.run(%{
           cpf_reciever: cpf2,
-          amount: %{amount: 20000},
+          amount: %{amount: 20_000},
           id_sender: user3.id
         })
 
       {:ok, transaction3} =
         %Potinho.Transaction{
           user_reciever_id: user2.id,
-          amount: 25000,
+          amount: 25_000,
           user_sender_id: user3.id,
           is_chargeback: false,
           inserted_at: NaiveDateTime.new!(~D[2021-01-13], ~T[23:00:07]),
@@ -221,7 +221,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
       {:ok, %{create_transaction_register: _transaction4}} =
         Potinho.Transaction.Create.run(%{
           cpf_reciever: cpf,
-          amount: %{amount: 30000},
+          amount: %{amount: 30_000},
           id_sender: user2.id
         })
 
@@ -245,7 +245,6 @@ defmodule PotinhoWeb.TransactionControllerTest do
       }
 
       response = get(conn, Routes.transaction_path(conn, :index), params)
-      IO.inspect(response)
       [transaction1, transaction2] = Jason.decode!(response.resp_body)
       assert response.status == 200
       assert transaction1["transaction_id"] == from_db_transaction1.id
@@ -336,7 +335,7 @@ defmodule PotinhoWeb.TransactionControllerTest do
       {:ok, %{create_transaction_register: transaction}} =
         Potinho.Transaction.Create.run(%{
           cpf_reciever: cpf2,
-          amount: %{amount: 20000},
+          amount: %{amount: 20_000},
           id_sender: id
         })
 
@@ -365,8 +364,8 @@ defmodule PotinhoWeb.TransactionControllerTest do
       %{balance: %{amount: user_1_amount}} = Repo.get_by(Potinho.User, id: user1.id)
       %{balance: %{amount: user_3_amount}} = Repo.get_by(Potinho.User, id: user3.id)
 
-      assert user_2_amount == 40050
-      assert user_1_amount == 80050
+      assert user_2_amount == 40_050
+      assert user_1_amount == 80_050
       assert user_3_amount == 7_000_050
 
       response = post(conn, Routes.transaction_path(conn, :chargeback), params)
@@ -376,12 +375,50 @@ defmodule PotinhoWeb.TransactionControllerTest do
       %{balance: %{amount: user_1_chagebacked}} = Repo.get_by(Potinho.User, id: user1.id)
       %{balance: %{amount: user_3_chagebacked}} = Repo.get_by(Potinho.User, id: user3.id)
 
-      assert user_2_chagebacked == 20050
+      assert user_2_chagebacked == 20_050
       assert user_1_chagebacked == 100_050
       assert user_3_chagebacked == 7_000_050
 
       [%{is_chargeback: is_chargeback}] = Potinho.Repo.all(Potinho.Transaction)
       assert is_chargeback
+    end
+
+    test "with run 2 times chargeback", %{
+      conn: conn,
+      transaction_id: transaction_id,
+      user1: user1,
+      user2: user2,
+      user3: user3
+    } do
+      params = %{
+        "transaction_id" => transaction_id
+      }
+
+      %{balance: %{amount: user_2_amount}} = Repo.get_by(Potinho.User, id: user2.id)
+      %{balance: %{amount: user_1_amount}} = Repo.get_by(Potinho.User, id: user1.id)
+      %{balance: %{amount: user_3_amount}} = Repo.get_by(Potinho.User, id: user3.id)
+
+      assert user_2_amount == 40_050
+      assert user_1_amount == 80_050
+      assert user_3_amount == 7_000_050
+
+      response1 = post(conn, Routes.transaction_path(conn, :chargeback), params)
+      response2 = post(conn, Routes.transaction_path(conn, :chargeback), params)
+      assert response1.status == 204
+
+      %{balance: %{amount: user_2_chagebacked}} = Repo.get_by(Potinho.User, id: user2.id)
+      %{balance: %{amount: user_1_chagebacked}} = Repo.get_by(Potinho.User, id: user1.id)
+      %{balance: %{amount: user_3_chagebacked}} = Repo.get_by(Potinho.User, id: user3.id)
+
+      assert user_2_chagebacked == 20_050
+      assert user_1_chagebacked == 100_050
+      assert user_3_chagebacked == 7_000_050
+
+      [%{is_chargeback: is_chargeback}] = Potinho.Repo.all(Potinho.Transaction)
+      assert is_chargeback
+
+      assert response2.status == 400
+      assert response2.resp_body == "{\"message\":\"chargeback already done\"}"
     end
 
     test "when is not possible to chagerback", %{
@@ -398,15 +435,15 @@ defmodule PotinhoWeb.TransactionControllerTest do
       {:ok, %{create_transaction_register: _transaction}} =
         Potinho.Transaction.Create.run(%{
           cpf_reciever: user3.cpf,
-          amount: %{amount: 30000},
+          amount: %{amount: 30_000},
           id_sender: user2.id
         })
 
       %{balance: %{amount: user_2_amount}} = Repo.get_by(Potinho.User, id: user2.id)
       %{balance: %{amount: user_1_amount}} = Repo.get_by(Potinho.User, id: user1.id)
 
-      assert user_2_amount == 10050
-      assert user_1_amount == 80050
+      assert user_2_amount == 10_050
+      assert user_1_amount == 80_050
 
       response = post(conn, Routes.transaction_path(conn, :chargeback), params)
       assert response.status == 400
@@ -415,8 +452,8 @@ defmodule PotinhoWeb.TransactionControllerTest do
       %{balance: %{amount: user_2_chagebacked}} = Repo.get_by(Potinho.User, id: user2.id)
       %{balance: %{amount: user_1_chagebacked}} = Repo.get_by(Potinho.User, id: user1.id)
 
-      assert user_2_chagebacked == 10050
-      assert user_1_chagebacked == 80050
+      assert user_2_chagebacked == 10_050
+      assert user_1_chagebacked == 80_050
 
       [%{is_chargeback: is_chargeback}, %{is_chargeback: is_chargeback2}] =
         Potinho.Repo.all(Potinho.Transaction)

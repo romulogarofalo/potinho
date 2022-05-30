@@ -59,11 +59,14 @@ defmodule PotinhoWeb.TransactionController do
 
   def chargeback(conn, %{"transaction_id" => transaction_id}) do
     with %{"id" => user_id} <- Guardian.Plug.current_resource(conn),
-         {:ok, transaction} <- Chargeback.run(transaction_id, user_id) do
+         {:ok, _transaction} <- Chargeback.run(transaction_id, user_id) do
       conn
-      |> put_status(:no_content)
-      |> render("chargeback.json", transaction)
+      |> put_resp_content_type("application/json")
+      |> Plug.Conn.send_resp(204, "")
     else
+      {:error, :verify_charback_step, :chargeback_already_done, _} ->
+        ErrorHandler.bad_request(conn, "chargeback already done")
+
       {:error, :verify_balance_step, :balance_too_low, _} ->
         ErrorHandler.bad_request(conn, "chargeback is not possible")
 

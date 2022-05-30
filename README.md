@@ -8,6 +8,7 @@
 - [Getting Started](#getting-started)
   - [Running Locally](#running-locally)
   - [Running Tests](#running-tests)
+  - [Running Livebook](#running-livebook)
 - [Available Routes](#available-routes)
 - [Useful Links](#useful-links)  
   
@@ -67,7 +68,7 @@ To run the tests, run the following command:
 mix phx.server
 ```
 
-## Running The Livebook
+## Running Livebook
 when docker-compose is up the Livebook will be up on [localhost:8080](localhost:8080) and to make the requests the server will need to be up on your computer (not the docker)
 
 Password is `potinho-password`

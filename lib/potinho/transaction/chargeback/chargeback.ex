@@ -9,6 +9,7 @@ defmodule Potinho.Transaction.Chargeback do
   def run(transaction_id, user_id) do
     Multi.new()
     |> Multi.run(:get_transaction_step, get_transaction(transaction_id, user_id))
+    |> Multi.run(:verify_charback_step, &verify_charback/2)
     |> Multi.run(:verify_balance_step, &check_balance_for_chargeback/2)
     |> Multi.run(:subtract_from_reciever_step, &subtract_from_reciever/2)
     |> Multi.run(:add_to_sender_step, &add_to_sender/2)
@@ -33,6 +34,18 @@ defmodule Potinho.Transaction.Chargeback do
         transaction ->
           {:ok, transaction}
       end
+    end
+  end
+
+  def verify_charback(_repo, %{
+    get_transaction_step: %{
+      is_chargeback: is_chargeback
+    }
+  }) do
+    if is_chargeback do
+      {:error, :chargeback_already_done}
+    else
+      {:ok, :transaction_ok_to_run}
     end
   end
 

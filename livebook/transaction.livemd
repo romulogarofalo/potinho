@@ -1,0 +1,208 @@
+# Transactions
+
+## install dependencies
+
+```elixir
+Mix.install([
+  :uuid,
+  :ecto,
+  :tesla,
+  :jason,
+  :postgrex,
+  :hackney,
+  {:kino, "~> 0.4.1"}
+])
+```
+
+## setting global vars
+
+```elixir
+# api_url = "http://localhost/4000"
+api_url = "http://127.0.0.1:4000/api"
+
+database_connect_params = [
+  username: "postgres",
+  password: "postgres",
+  database: "potinho_dev",
+  hostname: "localhost"
+]
+
+middlewares = [
+  Tesla.Middleware.KeepRequest,
+  {Tesla.Middleware.Headers, [{"content-type", "application/json"}]},
+  Tesla.Middleware.JSON
+]
+
+adapter = {Tesla.Adapter.Hackney, [recv_timeout: 30_000]}
+```
+
+## Connect to database
+
+```elixir
+{:ok, db_connection} = Postgrex.start_link(database_connect_params)
+```
+
+## create login token
+
+```elixir
+login = Kino.Input.text("login")
+```
+
+```elixir
+password = Kino.Input.text("password")
+```
+
+```elixir
+login = Kino.Input.read(login)
+password_input = Kino.Input.read(password)
+
+params = %{
+  password: password_input,
+  cpf: login
+}
+
+client = Tesla.client(middlewares, adapter)
+
+%{
+  body: %{"token" => token},
+  status: status
+} =
+  Tesla.post!(client, api_url <> "/login", params, headers: [{"content-type", "application/json"}])
+
+IO.puts("set token #{token}")
+
+:ok
+```
+
+## Create a new transaction
+
+```elixir
+cpf_reciever = Kino.Input.text("cpf_reciever")
+```
+
+```elixir
+amount = Kino.Input.text("amount")
+```
+
+```elixir
+cpf_reciever = Kino.Input.read(cpf_reciever)
+amount = Kino.Input.read(amount)
+
+params = %{
+  cpf_reciever: cpf_reciever,
+  amount: amount
+}
+
+client = Tesla.client(middlewares, adapter)
+
+%{
+  body: body,
+  status: status
+} =
+  response =
+  Tesla.post!(client, api_url <> "/transaction", params,
+    headers: [
+      {"content-type", "application/json"},
+      {"authorization", "Bearer #{token}"}
+    ]
+  )
+
+IO.puts("status: #{status}")
+IO.puts("response body #{Jason.encode!(body)}")
+```
+
+## List transactions by init and end data
+
+```elixir
+inital_date_ISO8601 = Kino.Input.text("inital_date_ISO8601")
+```
+
+```elixir
+end_date_ISO8601 = Kino.Input.text("end_date_ISO8601")
+```
+
+```elixir
+inital_date_ISO8601 = Kino.Input.read(inital_date_ISO8601)
+end_date_ISO8601 = Kino.Input.read(end_date_ISO8601)
+
+params = %{
+  initial_date: inital_date_ISO8601,
+  end_date: end_date_ISO8601
+}
+
+client = Tesla.client(middlewares, adapter)
+
+%{
+  body: body,
+  status: status
+} =
+  response =
+  Tesla.get!(client, api_url <> "/transactions",
+    query: params,
+    headers: [
+      {"content-type", "application/json"},
+      {"authorization", "Bearer #{token}"}
+    ]
+  )
+
+# IO.inspect(body)
+IO.puts("status: #{status}")
+Kino.DataTable.new(body)
+```
+
+## Create chargeback
+
+```elixir
+transaction_id = Kino.Input.text("transaction_id")
+```
+
+```elixir
+transaction_id = Kino.Input.read(transaction_id)
+
+params = %{
+  transaction_id: transaction_id
+}
+
+client = Tesla.client(middlewares, adapter)
+
+%{
+  body: body,
+  status: status
+} =
+  Tesla.post!(client, api_url <> "/chargeback", params,
+    headers: [
+      {"content-type", "application/json"},
+      {"authorization", "Bearer #{token}"}
+    ]
+  )
+
+IO.puts("status: #{status}")
+IO.puts("response body #{Jason.encode!(body)}")
+```
+
+## Consult table of transactions
+
+```elixir
+%{rows: rows} =
+  Postgrex.query!(
+    db_connection,
+    "select id, user_sender_id, user_reciever_id, amount, is_chargeback from transactions",
+    []
+  )
+
+rows_parserd =
+  Enum.map(rows, fn [id, user_sender_id, user_reciever_id, amount, is_chargeback] ->
+    %{
+      id: UUID.binary_to_string!(id),
+      user_sender_id: UUID.binary_to_string!(user_sender_id),
+      user_reciever_id: UUID.binary_to_string!(user_reciever_id),
+      amount: amount,
+      is_chargeback: is_chargeback
+    }
+  end)
+
+Kino.DataTable.new(
+  rows_parserd,
+  keys: [:id, :user_sender_id, :user_reciever_id, :amount, :is_chargeback]
+)
+```

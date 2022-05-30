@@ -19,3 +19,12 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  livebook:
+    image: livebook/livebook:edge
+    environment:
+      - LIVEBOOK_PASSWORD=potinho-password
+    volumes:
+      - ./livebook:/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    network_mode: host

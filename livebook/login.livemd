@@ -1,0 +1,151 @@
+# Login scripts
+
+## Install dependencies
+
+```elixir
+Mix.install([
+  :uuid,
+  :ecto,
+  :tesla,
+  :jason,
+  :postgrex,
+  :hackney,
+  {:kino, "~> 0.4.1"}
+])
+```
+
+## setting global vars
+
+```elixir
+# api_url = "http://localhost/4000"
+api_url = "http://127.0.0.1:4000/api"
+
+database_connect_params = [
+  username: "postgres",
+  password: "postgres",
+  database: "potinho_dev",
+  hostname: "localhost"
+]
+
+middlewares = [
+  Tesla.Middleware.KeepRequest,
+  {Tesla.Middleware.Headers, [{"content-type", "application/json"}]},
+  Tesla.Middleware.JSON
+]
+
+adapter = {Tesla.Adapter.Hackney, [recv_timeout: 30_000]}
+```
+
+## Connect to database
+
+```elixir
+{:ok, db_connection} = Postgrex.start_link(database_connect_params)
+```
+
+## Create new user
+
+```elixir
+full_name = Kino.Input.text("full_name_user")
+```
+
+```elixir
+password = Kino.Input.text("password")
+```
+
+```elixir
+cpf = Kino.Input.text("cpf")
+```
+
+```elixir
+balance = Kino.Input.text("balance")
+```
+
+### POST /signup
+
+```elixir
+full_name_input = Kino.Input.read(full_name)
+password_input = Kino.Input.read(password)
+cpf_input = Kino.Input.read(cpf)
+balance_input = Kino.Input.read(balance)
+
+params = %{
+  full_name_user: full_name_input,
+  password: password_input,
+  cpf: cpf_input,
+  balance: balance_input
+}
+
+client = Tesla.client(middlewares, adapter)
+
+%{
+  body: body,
+  status: status
+} =
+  response =
+  Tesla.post!(client, api_url <> "/signup", params,
+    headers: [{"content-type", "application/json"}]
+  )
+
+# IO.inspect(response)
+IO.puts("status: #{status}")
+IO.puts("response body #{Jason.encode!(body)}")
+```
+
+```elixir
+login = Kino.Input.text("login")
+```
+
+```elixir
+password = Kino.Input.text("password")
+```
+
+### POST /login
+
+```elixir
+login = Kino.Input.read(login)
+password_input = Kino.Input.read(password)
+
+params = %{
+  password: password_input,
+  cpf: login
+}
+
+client = Tesla.client(middlewares, adapter)
+
+%{
+  body: body,
+  status: status
+} =
+  response =
+  Tesla.post!(client, api_url <> "/login", params, headers: [{"content-type", "application/json"}])
+
+# IO.inspect(response)
+IO.puts("status: #{status}")
+IO.puts("response body #{Jason.encode!(body)}")
+```
+
+## consult table of users
+
+```elixir
+%{rows: rows} =
+  Postgrex.query!(
+    db_connection,
+    "select id, full_name_user, cpf, balance from users",
+    []
+  )
+
+rows_parserd =
+  Enum.map(rows, fn [id, full_name_user, cpf, balance] ->
+    %{
+      id: UUID.binary_to_string!(id),
+      full_name_user: full_name_user,
+      cpf: cpf,
+      balance: balance
+    }
+  end)
+
+Kino.DataTable.new(
+  rows_parserd,
+  keys: [:id, :full_name_user, :cpf, :balance]
+)
+```

@@ -22,7 +22,7 @@ What was used:
 - **[Postgres](https://www.postgresql.org/)** to store the data and **[Ecto](https://hexdocs.pm/ecto/Ecto.html)** as a """ORM""" (but is not a ORM is a DSL).
 - **[Ex_unit](https://hexdocs.pm/ex_unit/main/ExUnit.html)** to run tests.
 - **[ASDF](https://asdf-vm.com/)** to manage multiple versions
-- **[LiveBook]**() To easily create scripts of a business cycle
+- **[LiveBook](https://livebook.dev/)** To easily create scripts of a business cycle
 
 # Getting Started
 To get started, you should install **Docker**, **Docker Compose**, and **ASDF**.

@@ -28,7 +28,7 @@ What was used:
 To get started, you should install **Docker**, **Docker Compose**, and **ASDF**.
 Then, clone the repository:
 ```sh
-git clone https://github.com/romulogarofalo/Gastar.me.git
+git clone https://github.com/romulogarofalo/potinho
 ```
 enter in the folder
 ```sh

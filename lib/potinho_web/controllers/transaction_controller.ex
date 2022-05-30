@@ -67,11 +67,14 @@ defmodule PotinhoWeb.TransactionController do
       {:error, :verify_charback_step, :chargeback_already_done, _} ->
         ErrorHandler.bad_request(conn, "chargeback already done")
 
-      {:error, :verify_balance_step, :balance_too_low, _} ->
+      {:error, :verify_balance_reciever_step, :balance_too_low, _} ->
         ErrorHandler.bad_request(conn, "chargeback is not possible")
 
       {:error, :get_transaction_step, _, _} ->
         ErrorHandler.not_found(conn, "transaction not found")
+
+      {:error, :get_transaction_step, :user_not_found, _} ->
+          ErrorHandler.bad_request(conn, "user not found")
 
       {:error, %Ecto.Changeset{}} ->
         ErrorHandler.bad_request(conn)

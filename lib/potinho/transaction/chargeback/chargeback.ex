@@ -10,8 +10,9 @@ defmodule Potinho.Transaction.Chargeback do
     Multi.new()
     |> Multi.run(:get_transaction_step, get_transaction(transaction_id, user_id))
     |> Multi.run(:verify_charback_step, &verify_charback/2)
-    |> Multi.run(:verify_balance_step, &check_balance_for_chargeback/2)
+    |> Multi.run(:verify_balance_reciever_step, &verify_balance_reciever_for_chargeback/2)
     |> Multi.run(:subtract_from_reciever_step, &subtract_from_reciever/2)
+    |> Multi.run(:get_sender_step, &get_sender/2)
     |> Multi.run(:add_to_sender_step, &add_to_sender/2)
     |> Multi.run(:update_transaction_register_step, &update_transaction_register/2)
     |> Repo.transaction()
@@ -22,7 +23,6 @@ defmodule Potinho.Transaction.Chargeback do
       query =
         from t in Transaction,
           where: t.id == ^transaction_id and t.user_sender_id == ^user_id,
-          preload: [:user_sender, :user_reciever],
           lock: "FOR UPDATE NOWAIT"
 
       query
@@ -49,34 +49,52 @@ defmodule Potinho.Transaction.Chargeback do
     end
   end
 
-  def check_balance_for_chargeback(
-        _repo,
+  def verify_balance_reciever_for_chargeback(
+        repo,
         %{
           get_transaction_step: %{
             amount: amount_transaction,
-            user_reciever:
-              %{
-                balance: %{amount: reciever_amount}
-              } = user_reciever,
-            user_sender: user_sender
+            user_reciever_id: user_reciever_id
           }
         }
       ) do
-    if reciever_amount < amount_transaction.amount,
+
+    user_reciever = from(user in User,
+        where: user.id == ^user_reciever_id,
+        lock: "FOR UPDATE NOWAIT"
+      )
+      |> repo.one()
+
+    if user_reciever.balance.amount < amount_transaction.amount,
       do: {:error, :balance_too_low},
-      else: {:ok, {user_sender, user_reciever, amount_transaction.amount}}
+      else: {:ok, {user_reciever, amount_transaction.amount}}
   end
 
   def subtract_from_reciever(repo, %{
-        verify_balance_step: {_user_sender, user_reciever, amount_transaction}
+        verify_balance_reciever_step: {user_reciever, amount_transaction}
       }) do
     user_reciever
     |> User.changeset(%{balance: Money.subtract(user_reciever.balance, amount_transaction)})
     |> repo.update()
   end
 
+  defp get_sender(repo, %{
+    get_transaction_step: %{user_sender_id: user_sender_id}
+  }) do
+    case from(user in User,
+            where: user.id == ^user_sender_id,
+            lock: "FOR UPDATE NOWAIT"
+          )
+          |> repo.one() do
+      nil -> {:error, :user_not_found}
+      user_reciever -> {:ok, user_reciever}
+    end
+  end
+
+
   def add_to_sender(repo, %{
-        verify_balance_step: {user_sender, _user_reciever, amount_transaction}
+        get_sender_step: user_sender,
+        verify_balance_reciever_step: {_user_reciever, amount_transaction}
       }) do
     user_sender
     |> User.changeset(%{balance: Money.add(user_sender.balance, amount_transaction)})
